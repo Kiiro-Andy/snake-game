@@ -15,8 +15,9 @@ import Snake from "./Snake";
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
 const GAME_BOUNDS = { xMin: 0, xMax: 35, yMin: 0, yMax: 63 };
-const MOVE_INTERVAL = 50;
+const MOVE_INTERVAL_INITIAL = 100;
 const SCORE_INCREMENT = 10;
+const SPEED_INCREMENT = 100;
 
 export default function Game(): React.ReactElement {
 	const [direction, setDirection] = useState<Direction>(Direction.Right);
@@ -27,12 +28,13 @@ export default function Game(): React.ReactElement {
 	const [score, setScore] = useState<number>(0);
 	const [isGameOver, setIsGameOver] = useState<boolean>(false);
 	const [isPaused, setIsPaused] = useState<boolean>(false);
+	const [moveInterval, setMoveInterval] = useState<number>(MOVE_INTERVAL_INITIAL);
 
 	useEffect(() => {
 		if (!isGameOver) {
 			const intervalId = setInterval(() => {
 				!isPaused && moveSnake();
-			}, MOVE_INTERVAL);
+			}, moveInterval);
 			return () => clearInterval(intervalId);
 		}
 	}, [snake, isGameOver, isPaused]);
@@ -69,6 +71,8 @@ export default function Game(): React.ReactElement {
 			setPalette(Palettes[Math.floor(Math.random() * Palettes.length)]);
 			setSnake([newHead, ...snake]);
 			setScore(score + SCORE_INCREMENT);
+
+			setMoveInterval((prev) => Math.max(50, prev - SPEED_INCREMENT));
 		} else {
 			setSnake([newHead, ...snake.slice(0, -1)]);
 		}
@@ -100,6 +104,7 @@ export default function Game(): React.ReactElement {
 		setScore(0);
 		setDirection(Direction.Right);
 		setIsPaused(false);
+		setMoveInterval(MOVE_INTERVAL_INITIAL);
 	};
 
 	const pauseGame = () => {
